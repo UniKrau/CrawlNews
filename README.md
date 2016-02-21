@@ -1,20 +1,18 @@
 # CrawlNews
 
-A beautiful crawl framework , scrapy.
+A beautiful crawl framework , scrapy. but used a little part function
 
-The section one ,sprider just crawls the parts of the  website "bbc.com" information 
+First of all , the section one , the sprider just crawls the parts of the  website "bbc.com" information 
 
-It can be done better in future ,will do the theme crwal
+It can be done better in future ,will be done the theme crwal more details
 
-The section two store 
+The second part is storage that is supported three kinds  mongodb store, singletone , distirbute mode and 
+S3 storage, anyway only is singleton mongodb  worked in this case 
 
- Applied mongodb store, singletone , distirbute mode and S3 storage
-
-The section three dupfilter
-
-Based on  the Redis server 
+The section three dupfilter based on  the redis server to big scale crwal internet information
 
 Last things about UnitTest haven't done it yet
+
 
 
 Thank you
