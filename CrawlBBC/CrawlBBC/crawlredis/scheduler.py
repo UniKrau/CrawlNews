@@ -11,7 +11,7 @@ from scrapy.utils.misc import load_object
 
 
 # default values
-REDIS_HOST = 'localhost'
+REDIS_HOST = '10.0.0.7'
 REDIS_PORT = 6379
 SCHEDULER_PERSIST = False
 QUEUE_KEY = '%(spider)s:requests'

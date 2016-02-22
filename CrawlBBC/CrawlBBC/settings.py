@@ -16,7 +16,9 @@ BOT_NAME = 'CrawlBBC'
 
 SPIDER_MODULES = ['CrawlBBC.spiders']
 NEWSPIDER_MODULE = 'CrawlBBC.spiders'
-ITEM_PIPELINES = {'CrawlBBC.pipelines.CrawlbbcPipeline',}
+ITEM_PIPELINES = {'CrawlBBC.pipelines.CrawlbbcPipeline',
+		 # 'CrawlBBC.pipelines.ShardMongodbPipeline',
+		}
 
 DEPTH_LIMIT = 3
 
@@ -24,6 +26,10 @@ DEPTH_LIMIT = 3
 HOST = "10.0.0.7"
 PORT = 27017
 DB = 'NewsDB'
+
+SCHEDULER = "CrawlBBC.crawlredis.scheduler.Scheduler"
+SCHEDULER_PERSIST = False
+SCHEDULER_QUEUE_CLASS = 'CrawlBBC.crawlredis.queue.SpiderPriorityQueue'
 
 # This is going to be the amazon s3 bucket.
 # You need to use the below format so Scrapy
