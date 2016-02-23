@@ -37,10 +37,6 @@ SCHEDULER_QUEUE_CLASS = 'CrawlBBC.crawlredis.queue.SpiderPriorityQueue'
 # the trailing slash.
 
 #IMAGES_STORE = 's3'
-
-#AWSAccessKeyId='AKIAIWYT6NOOAKISI22Q'
-#AWSSecretKey='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'
-
 #IMAGES_EXPIRES = 30
 
 #IMAGES_THUMBS = {
