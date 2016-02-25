@@ -13,6 +13,8 @@ The section three dupfilter is based on  the redis server to big scale crwal int
 
 The last thing about UnitTest has not been done yet.
 
+In future , we will use Natural Language Processing to analysis the text
+
 Thank you
 
 Hao Li
