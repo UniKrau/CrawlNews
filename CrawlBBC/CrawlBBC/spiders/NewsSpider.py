@@ -26,32 +26,36 @@ class NewsSpider(CrawlSpider):
 
     start_urls = ["http://www.bbc.com/"]
 
-    rules = (Rule(LinkExtractor(allow=r'/news/[^/]',),
+    #rules = (Rule(LinkExtractor(allow=r'/news/[^/]',),
 
-                  callback="parse", process_links="filter_links", follow=True),
+    #              callback="parse", follow=True),
 
-             Rule(LinkExtractor(allow=r'/sport/[^/]',),
+    #         Rule(LinkExtractor(allow=r'/sport/[^/]',),
 
-                  callback="parse", process_links="filter_links", follow=True),
+    #              callback="parse", follow=True),
 
-             )
+    #         )
 
     def parse(self, response):
 
-        URLgroup=LinkExtractor(deny={r'\/privacy', r'\/contact', r'\/iplayer', r'\/help',}).extract_links(response)
+        # '//a/@href'
+        newurls = response.xpath('//a/@href').extract()
+        items = []
+        validurls = []
+        for url in newurls:
+                url = url.replace("#", " ").strip()
+                if new_prefix in url:
+                    validurls.append(url)
+                elif "http" not in url:
+                    url = new_prefix+url
+                    validurls.append(url)
 
-        for URL in URLgroup:
-            if new_prefix in URL.url:
+        validurls = list(set(validurls))
 
-                yield Request(url=URL.url, callback=self.parse_content)
+        items.extend([self.make_requests_from_url(url).replace(callback=self.parse) for url in validurls])
 
-    def filter_links(self, links):
-
-        filteredLinks = []
-
-        for link in links:
-            if link.url.find(new_prefix) < 0:
-                filteredLinks.append(link)
+        for URL in validurls:
+            yield Request(url=URL, callback=self.parse_content)
 
     def parse_content(self, response):
 
@@ -59,18 +63,14 @@ class NewsSpider(CrawlSpider):
 
         :param response:
         """
-        sel = Selector(response)
+
         items = []
         item = CrawlbbcItem()
-
-        item['news_title'] = response.xpath('/html/head/title/text()').extract()
-
-        item['article_text'] = response.xpath('//p/text()').extract()
-
-        item['article_url'] = response.url.strip()
-
+        import json
+        # '//p/text()'
+        item['text'] = response.xpath('//p/text()').extract()
         item["depth"] = response.meta["depth"]
-
+        item['json_data'] = response.xpath('//script[@type="application/ld+json"]/text()').extract()
         items.append(item)
 
         return items

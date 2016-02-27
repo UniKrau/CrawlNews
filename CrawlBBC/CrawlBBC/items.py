@@ -10,13 +10,8 @@ import scrapy
 
 class CrawlbbcItem(scrapy.Item):
     # define the fields for your item here like:
-
-    news_title = scrapy.Field()
-
-    article_url = scrapy.Field()
-
-    article_text = scrapy.Field()
-
+    text = scrapy.Field()
+    json_data = scrapy.Field()
     depth = scrapy.Field()
 
 #class AWSItem(scrapy.Item):
