@@ -15,8 +15,7 @@ from CrawlBBC.dbs.mongodb import NewsDB
 from pymongo import MongoClient
 #from CrawlBBC.settings import IMAGES_STORE
 import json
-
-from boto.s3.key import Key
+from CrawlBBC.utils.selector import NULL
 
 
 class CrawlbbcPipeline(object):
@@ -29,15 +28,28 @@ class CrawlbbcPipeline(object):
 
             return item
 
-        import json
         json_data = {}
-        for t in item['json_data']:
+        text_news = {}
+
+        for text in item['text']:
+            text = text.replace('/(^\s*)|(\s*$)/g/', "").replace("\n", "").strip()
+            if len(text) > 1:
+                if text is not NULL:
+                    text_news["text"] = text
+        for t in item['ld_json']:
             json_data = json.loads(t)
-            if json_data.has_key('itemListElement'):
+            if 'itemListElement' in json_data:
                 # can list for future
                 del json_data['itemListElement']
-        json_data['text'] = item['text']
+            if '@context' in json_data:
+                del json_data['@context']
+            if '@type' in json_data:
+                del json_data['@type']
+        json_data = dict(text_news.items()+json_data.items())
         json_data['depth'] = item['depth']
+
+        NewsDB.news.insert(json_data)
+
         # dic ={}
         # xx = []
         # for t in item['json_data']:
@@ -55,7 +67,6 @@ class CrawlbbcPipeline(object):
         #        'update_time': datetime.datetime.utcnow(),  # for comparison
         #        }
         # save to mongo DB
-        NewsDB.news.insert(json_data)
 
         return None
 

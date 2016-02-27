@@ -66,11 +66,10 @@ class NewsSpider(CrawlSpider):
 
         items = []
         item = CrawlbbcItem()
-        import json
         # '//p/text()'
         item['text'] = response.xpath('//p/text()').extract()
         item["depth"] = response.meta["depth"]
-        item['json_data'] = response.xpath('//script[@type="application/ld+json"]/text()').extract()
+        item['ld_json'] = response.xpath('//script[@type="application/ld+json"]/text()').extract()
         items.append(item)
 
         return items
