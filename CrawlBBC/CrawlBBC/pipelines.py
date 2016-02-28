@@ -32,7 +32,7 @@ class CrawlbbcPipeline(object):
         text_news = {}
 
         for text in item['text']:
-            text = text.replace('/(^\s*)|(\s*$)/g/', "").replace("\n", "").strip()
+            text = text.replace('/(^\s*)|(\s*$)/g/', "").replace("\n", " ").strip()
             if len(text) > 1:
                 if text is not NULL:
                     text_news["text"] = text
@@ -47,6 +47,8 @@ class CrawlbbcPipeline(object):
                 del json_data['@type']
         json_data = dict(text_news.items()+json_data.items())
         json_data['depth'] = item['depth']
+        json_data['abs_url'] = item['abs_url']
+        json_data['title'] = item['title']
 
         NewsDB.news.insert(json_data)
 
@@ -58,7 +60,6 @@ class CrawlbbcPipeline(object):
         #        list_data = json_data.get('itemListElement')
         #        print("--------------\n")
         #        dic = list_data[0]
-        #        xx.extend([self.make_requests_from_url(dic.get('url')).replace(callback=self.parse)])
         #    if 'author' in json_data.keys():
         #        print (json_data['author'])
         # data = {"news_title": item['news_title'],
@@ -70,6 +71,15 @@ class CrawlbbcPipeline(object):
 
         return None
 
+    @classmethod
+    def from_crawler(cls, crawler):
+        cls.SERVER = crawler.settings.get('HOST', '10.0.0.7')
+        cls.PORT = crawler.settings.getint('PORT', 27017)
+        cls.DB = crawler.settings.get('DB', 'NewsDB')
+        cls.GridFs_Collection = crawler.settings.get('GridFs_Collection', 'news')
+        pipe = cls()
+        pipe.crawler = crawler
+        return pipe
 # upload data to S3
 #class awspipeline(object):
 
