@@ -41,11 +41,6 @@ class CrawlbbcPipeline(object):
                 if len(it) > 1:
                     cleaninput.append(it)
             text_news['text'] = " ".join(cleaninput)
-        # for text in item['text']:
-        #    text = text.replace('/(^\s*)|(\s*$)/g/', "").replace("\n", " ").strip()
-        #    if len(text) > 1:
-        #       if text is not NULL:
-        #            text_news["text"] = text
         for t in item['ld_json']:
             json_data = json.loads(t)
             if 'itemListElement' in json_data:
@@ -55,29 +50,15 @@ class CrawlbbcPipeline(object):
                 del json_data['@context']
             if '@type' in json_data:
                 del json_data['@type']
+            if 'url' not in json_data:
+                json_data['abs_url'] = item['abs_url']
+
         json_data = dict(text_news.items() + json_data.items())
         json_data['depth'] = item['depth']
-        json_data['abs_url'] = item['abs_url']
         json_data['title'] = item['title']
 
-        NewsDB.news.insert(json_data)
-
-        # dic ={}
-        # xx = []
-        # for t in item['json_data']:
-        #    json_data = json.loads(t)
-        #    if json_data.has_key('itemListElement'):
-        #        list_data = json_data.get('itemListElement')
-        #        print("--------------\n")
-        #        dic = list_data[0]
-        #    if 'author' in json_data.keys():
-        #        print (json_data['author'])
-        # data = {"news_title": item['news_title'],
-        #        "article_url": json_data['url'],
-        #        "article_text": item['article_text'],
-        #        'update_time': datetime.datetime.utcnow(),  # for comparison
-        #        }
         # save to mongo DB
+        NewsDB.news.insert(json_data)
 
         return None
 
