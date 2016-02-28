@@ -13,29 +13,39 @@ import logging
 import boto3
 from CrawlBBC.dbs.mongodb import NewsDB
 from pymongo import MongoClient
-#from CrawlBBC.settings import IMAGES_STORE
+# from CrawlBBC.settings import IMAGES_STORE
 import json
+import re
+import string
 from CrawlBBC.utils.selector import NULL
 
 
 class CrawlbbcPipeline(object):
-
     # single mongo db
 
     def process_item(self, item, spider):
 
         if spider.name != "bbcNews":
-
             return item
 
         json_data = {}
         text_news = {}
-
-        for text in item['text']:
-            text = text.replace('/(^\s*)|(\s*$)/g/', "").replace("\n", " ").strip()
-            if len(text) > 1:
-                if text is not NULL:
-                    text_news["text"] = text
+        cleaninput = []
+        for txt in item['text']:
+            input = re.sub('\n+', " ", txt)
+            input = re.sub('\[[0-9]*\]', "", input)
+            input = re.sub(' +', " ", input)
+            input = input.split(' ')
+            for it in input:
+                it = it.strip(string.punctuation)
+                if len(it) > 1:
+                    cleaninput.append(it)
+            text_news['text'] = " ".join(cleaninput)
+        # for text in item['text']:
+        #    text = text.replace('/(^\s*)|(\s*$)/g/', "").replace("\n", " ").strip()
+        #    if len(text) > 1:
+        #       if text is not NULL:
+        #            text_news["text"] = text
         for t in item['ld_json']:
             json_data = json.loads(t)
             if 'itemListElement' in json_data:
@@ -45,7 +55,7 @@ class CrawlbbcPipeline(object):
                 del json_data['@context']
             if '@type' in json_data:
                 del json_data['@type']
-        json_data = dict(text_news.items()+json_data.items())
+        json_data = dict(text_news.items() + json_data.items())
         json_data['depth'] = item['depth']
         json_data['abs_url'] = item['abs_url']
         json_data['title'] = item['title']
@@ -80,15 +90,16 @@ class CrawlbbcPipeline(object):
         pipe = cls()
         pipe.crawler = crawler
         return pipe
-# upload data to S3
-#class awspipeline(object):
+
+    # upload data to S3
+    # class awspipeline(object):
 
     #  def process_item(self, item, spider):
-       # s3client = boto3.mongoclient(IMAGES_STORE)
+    # s3client = boto3.mongoclient(IMAGES_STORE)
 
-       # s3client.put_object(Bucket='haoli', Key='news_title', Body='article_url')
+    # s3client.put_object(Bucket='haoli', Key='news_title', Body='article_url')
 
-       # return item
+    # return item
 
 
 class ShardMongodbPipeline(object):
@@ -112,7 +123,7 @@ class ShardMongodbPipeline(object):
             client = MongoClient(self.HOST, self.PORT)
             self.db = client[self.DB]
         except Exception as e:
-            print self.style.ERROR("ERROR(ShardMongodbPipeline): %s"%(str(e),))
+            print self.style.ERROR("ERROR(ShardMongodbPipeline): %s" % (str(e),))
             traceback.print_exc()
 
     @classmethod
