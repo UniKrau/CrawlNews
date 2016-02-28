@@ -26,15 +26,13 @@ class NewsSpider(CrawlSpider):
 
     start_urls = ["http://www.bbc.com/"]
 
-    #rules = (Rule(LinkExtractor(allow=r'/news/[^/]',),
-
-    #              callback="parse", follow=True),
-
-    #         Rule(LinkExtractor(allow=r'/sport/[^/]',),
-
-    #              callback="parse", follow=True),
-
-    #         )
+    rules = [(Rule(LinkExtractor(allow=r'/news/',), callback="parse", follow=True)),
+            (Rule(LinkExtractor(deny=r'/iplayer/[^/]',), callback="parse", follow=False)),
+            (Rule(LinkExtractor(deny=r'/weather/[^/]',), callback="parse", follow=False)),
+            (Rule(LinkExtractor(deny=r'/http://www.bbc.co.uk/radio/[^/]',), callback="parse", follow=False)),
+            (Rule(LinkExtractor(deny=r'/privacy[^/]',), callback="parse", follow=False)),
+            (Rule(LinkExtractor(deny=r'/help[^/]',), callback="parse", follow=False)),
+             ]
 
     def parse(self, response):
 
@@ -67,9 +65,11 @@ class NewsSpider(CrawlSpider):
         items = []
         item = CrawlbbcItem()
         # '//p/text()'
+        item['title'] = response.xpath('/html/head/title/text()').extract()
         item['text'] = response.xpath('//p/text()').extract()
         item["depth"] = response.meta["depth"]
         item['ld_json'] = response.xpath('//script[@type="application/ld+json"]/text()').extract()
+        item['abs_url'] = response.url.strip()
         items.append(item)
 
         return items
