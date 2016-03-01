@@ -29,12 +29,14 @@ class QueryDb(object):
         try:
             client = MongoClient(SERVER, PORT)
             self.db = client[DB]
+            self.posts = self.db.news
+
         except Exception as e:
             logging.info( self.style.ERROR("ERROR(SingleMongodbPipeline): %s"%(str(e),)))
             traceback.print_exc()
 
     @classmethod
-    def from_crawler(cls,crawler):
+    def from_crawler(cls, crawler):
         cls.SERVER = crawler.setting.get(SERVER, '10.0.0.7')
         cls.PORT = crawler.setting.get(PORT, 27017)
         cls.DB = crawler.setting.get(DB, "NewsDB")
@@ -42,16 +44,64 @@ class QueryDb(object):
         pipe.crawler = crawler
         return pipe
 
-    def query_text(self,text):
+    def query_text(self, text):
 
-        posts = self.db.posts
-
-        posts.find.one("article_text", text)
-
-        return
+        try:
+            if text not in None:
+                return self.posts.find({"article_text": text})
+        except Exception as e:
+            logging.error(" headline is null")
+            traceback.print_exc()
 
     def query_title(self, title):
+        if title not in None:
+            return self.posts.find({"article_title": title})
 
-        posts = self.db.posts
+    def query_headline(self, headline):
 
-        posts.find.one("article_title", title)
+        try:
+            if headline is not None:
+                return self.posts.find({"headline": headline})
+        except Exception as e:
+            logging.error(" headline is null")
+            traceback.print_exc()
+
+    # logic or query
+    def query_or(self, headline, author):
+        if headline is None or author is None:
+            return " "
+        else:
+            return self.posts.find({"$or": [{"headline": headline}, {"author": author}]})
+
+    # Single field indexes
+    #def createsingleindexes(self):
+    #    self.posts.create_index()
+
+    # Compound indexes
+
+    # Multikey indexes
+
+    # Text indexes
+
+    # db.products.find( { description: { $regex: /^S/, $options: 'm' } } )
+
+    def text_match_query(self, context):
+
+        if context is not None:
+
+            return self.posts.find({"text": {"$regex": context}})
+
+if __name__ == '__main__':
+
+    query = QueryDb()
+
+    result = query.query_headline("Oscars 2016: Leonardo DiCaprio finally wins Academy Award")
+
+    for r in result:
+        if 'text' in r:
+            print ""
+
+    text = query.text_match_query(" today even more")
+
+    for t in text:
+        print t.get('text')
