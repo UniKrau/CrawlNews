@@ -37,7 +37,10 @@ class NewsSpider(CrawlSpider):
     def parse(self, response):
 
         # '//a/@href'
-        newurls = response.xpath('//a/@href').extract()
+        newurls = response.xpath('//div[@id="page"]//section[starts-with(@class,"module")]//'
+                                 'div[starts-with(@class, "module__content")]//'
+                                 'ul[starts-with(@class, "media-list")]//a/@href'
+                                 ).extract()
         items = []
         validurls = []
         for url in newurls:

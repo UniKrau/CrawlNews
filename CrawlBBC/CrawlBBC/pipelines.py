@@ -50,12 +50,12 @@ class CrawlbbcPipeline(object):
                 del json_data['@context']
             if '@type' in json_data:
                 del json_data['@type']
-            if 'url' not in json_data:
-                json_data['abs_url'] = item['abs_url']
+            json_data['abs_url'] = item['abs_url']
 
         json_data = dict(text_news.items() + json_data.items())
         json_data['depth'] = item['depth']
         json_data['title'] = item['title']
+        json_data['update_time'] = datetime.datetime.utcnow()
 
         # save to mongo DB
         NewsDB.news.insert(json_data)
